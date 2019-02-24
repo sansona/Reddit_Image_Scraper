@@ -3,6 +3,9 @@ import praw
 import requests
 from bs4 import BeautifulSoup
 
+import shutil
+import argparse
+import time
 import os
 import sys
 
@@ -57,7 +60,11 @@ def WriteAlbum(album_url, fname):
 
 
 def SaveImFromLink(submission_link):
+    '''
+    handles function routing from different types of inputs
+    '''
     if link.endswith(('.jpg', 'jpeg', '.tif', '.png')):
+
         WriteIm(link, sys.argv[1]+'/'+submission.title)
         print('Saving %s' % submission.title)
     elif 'http://imgur/a/' in link:
@@ -68,24 +75,49 @@ def SaveImFromLink(submission_link):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('Usage ./subreddit_scraper.py [-subreddit]')
+
+    parser = argparse.ArgumentParser(
+        description='Scrapes images from subreddit')
+    parser.add_argument('S', help='subreddit to scrape', type=str)
+    parser.add_argument('L', help='max number submissions to scrape',
+                        nargs='?', default=25, const=25, type=int)
+    args = parser.parse_args()
+
+    # fill in own credentials!
+    scraper = praw.Reddit(client_id='wni8KuJvkU88hg',
+                          client_secret='vF1am1wndJ9oBC0DaIm7x8C7Em4',
+                          user_agent='Subreddit scraper test',
+                          username='subreddit_scraper',
+                          password='11235Scrape')
+    sub = scraper.subreddit(args.S)
+
+    # if first time running, scrape top posts
+    if not os.path.exists(args.S):
+        os.makedirs(sys.argv[1])
+        for submission in sub.top(time_filter='all', limit=args.L):
+            link = submission.url
+            SaveImFromLink(link)
+        print('%s images scraped from %s' % ((
+            len(os.listdir(args.S))), args.S))
+    # if directory exists already, scrape hot posts
     else:
+        # archive old files
+        if len(os.listdir(args.S)) > 10:
+            shutil.make_archive(time.strftime('%Y%m%d'), 'zip', args.S)
 
-        scraper = praw.Reddit(client_id='wni8KuJvkU88hg',
-                              client_secret='vF1am1wndJ9oBC0DaIm7x8C7Em4',
-                              user_agent='Subreddit scraper test',
-                              username='subreddit_scraper',
-                              password='11235Scrape')
-        sub = scraper.subreddit(sys.argv[1])
+            for root, dirs, files in os.walk(args.S):
+                for f in files:
+                    if not f.endswith('.zip'):
+                        os.remove(os.path.join(root, f))
+                        print('Removed %s' % f)
 
-        if not os.path.exists(sys.argv[1]):
-            os.makedirs(sys.argv[1])
-            for submission in sub.top(time_filter='all', limit=100):
-                link = submission.url
-                SaveImFromLink(link)
-        else:
-            for submission in sub.hot(limit=25):
-                link = submission.url
-                SaveImFromLink(link)
-# ------------------------------------------------------------------------------
+            print('Archived to %s' % time.strftime('%Y%m%d') + '.zip')
+
+        starting_count = len(os.listdir(args.S))
+        for submission in sub.hot(limit=args.L):
+            link = submission.url
+            SaveImFromLink(link)
+        print('%s images scraped from %s' % ((
+            len(os.listdir(args.S)) - starting_count), args.S))
+
+        # ------------------------------------------------------------------------------
