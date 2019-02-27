@@ -1,31 +1,46 @@
+#!/usr/bin/python3
 import time
+import os
 import sys
+import imghdr
 import smtplib
-from email.mime.image import MIMEImage
-from email.mime.multipart import MIMEMultipart
+from email.message import EmailMessage
+from email.MIMEText import MIMEText
 
-# WIP
+SMTPServer = ''
 from_address = ''
-to_address = []
+to_addresses = []
+USERNAME = ''
+PASSWORD = ''
 
 if len(sys.argv == 2):
     date = time.strftime('%Y%m%d')
     subreddit = sys.argv[1]
 
-    msg = MIMEMultipart()
-    msg['Subject'] = date + subreddit
-    msg['From'] = from_address
-    msg['To'] = ', '.join(to_address)
+    os.chdir(sys.argv[1])
+    try:
+        msg = EmailMessage()
+        msg['Subject'] = date + subreddit
+        msg['From'] = from_address
+        msg['To'] = ', '.join(to_addresses)
 
-    for file in directory:
-        fp = open(file, 'rb')
-        im = MIMEImage(fp.read())
-        fp.close()
-        msg.attach(im)
+        message = 'Test string from python!'
+        msg.attach(MIMEText(message))
 
-    s = smtplib.SMTP('localhost')
-    s.sendmail(from_address, to_address, msg.as_string())
-    s.quit()
+        s = smtplib.SMTP(SMTPServer, 587)
+        s.login(USERNAME, PASSWORD)
+        '''
+        for file in directory:
+            with open(file, 'rb') as fp:
+                im = fp.read()
+            msg.add_attachment(im, maintype='image',
+                               subtype=imghdr.what(None, im))
+    '   '''
+
+        s.sendmail(from_address, to_addresses, msg.as_string())
+
+    except:
+        sys.exit('Sending failed: %s' % 'CUSTOM_ERROR')
 
 
 else:

@@ -144,7 +144,7 @@ if __name__ == '__main__':
     # if directory exists already, scrape hot posts
     else:
         # archive old files
-        if len(os.listdir(args.subreddit)) > 25:
+        if len(os.listdir(args.subreddit)) > args.L:
             date = time.strftime('%Y%m%d')
             shutil.make_archive(date, 'zip', args.subreddit)
 
