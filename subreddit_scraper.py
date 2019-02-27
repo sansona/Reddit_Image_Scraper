@@ -76,39 +76,26 @@ def SaveImFromLink(submission_link):
     '''
     if link.endswith(('.jpg', 'jpeg', '.tif', '.png')):
         WriteIm(link, sys.argv[1]+'/'+submission.title)
-        print('Saving %s' % submission.title)
+        #print('Saving %s' % submission.title)
     elif 'http://imgur/a/' in link:
-        print('Saving album %s ' % submission.title)
         WriteAlbum(link, sys.argv[1]+'/'+submission.title+'_'
                    + str(hit_idx))
+        #print('Saving album %s ' % submission.title)
 # ------------------------------------------------------------------------------
 
 
-def ConvertImToVid(directory):
+def ConvertImToVid(directory, w_max=960, h_max=720, fps=1.0):
     '''
-    (TODO): implement better way of aspect ratio resizing
     uses cv2.VideoWriter to make video from images scraped. 
 
     Called w/ -v arg
     '''
     ims = [file for file in os.listdir(directory) if not file.endswith('.zip')]
-    frame = cv2.imread(os.path.join(directory, ims[0]))
-    cv2.imshow('video', frame)
-    #w, h, channels = frame.shape
-
-    # get largest (w, h) in images, later resize all to that
-    w_max, h_max = (0, 0)
-    for image in ims:
-        im_path = os.path.join(directory, image)
-        dim_frame = cv2.imread(im_path)
-        w, h, channels = dim_frame.shape
-        if (w > w_max) and (h > h_max):
-            w_max, h_max = w, h
 
     # cv2 only supports .avi & MJPQ combo, keep as is
     vid_name = directory + '.avi'
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    video = cv2.VideoWriter(vid_name, fourcc, 1.0, (w_max, h_max))
+    video = cv2.VideoWriter(vid_name, fourcc, fps, (w_max, h_max))
 
     # loop to resize im to (w, h)_max, append to video
     for image in ims:
@@ -120,7 +107,7 @@ def ConvertImToVid(directory):
     video.release()
     cv2.destroyAllWindows()
     shutil.move(vid_name, directory+'/'+vid_name)
-
+    print('%s generated' % vid_name)
 # ------------------------------------------------------------------------------
 
 
@@ -134,6 +121,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--video',
                         help='create video from all images in directory',
                         action='store_true')
+
     args = parser.parse_args()
 
     # fill in own credentials!
@@ -147,6 +135,7 @@ if __name__ == '__main__':
     # if first time running, scrape top posts
     if not os.path.exists(args.subreddit):
         os.makedirs(sys.argv[1])
+        print('Scraping...')
         for submission in sub.top(time_filter='all', limit=args.L):
             link = submission.url
             SaveImFromLink(link)
@@ -169,6 +158,7 @@ if __name__ == '__main__':
 
         # scrape hot posts if directory already present
         starting_count = len(os.listdir(args.subreddit))
+        print('Scraping...')
         for submission in sub.hot(limit=args.L):
             link = submission.url
             SaveImFromLink(link)
