@@ -130,6 +130,7 @@ if __name__ == '__main__':
                           user_agent='',
                           username='',
                           password='')
+
     sub = scraper.subreddit(args.subreddit)
 
     # if first time running, scrape top posts
