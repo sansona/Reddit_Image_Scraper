@@ -12,6 +12,14 @@ import os
 import sys
 
 # ------------------------------------------------------------------------------
+# Scrapes and saves images from chosen subreddit. Includes functionality for
+# archiving new posts and auto-generating slideshow from images scraped.
+#
+# Intended to be used with conjunction with email.files.py to send
+# auto-generated email of hot new posts with help of cron or scheduler but
+# is self contained
+
+# ------------------------------------------------------------------------------
 
 
 def GenerateRandomFileName(name_len=10):
