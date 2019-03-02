@@ -123,22 +123,22 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
         description='Scrapes images from subreddit')
-    parser.add_argument('subreddit', help='subreddit to scrape', type=str)
+    parser.add_argument(
+        'subreddit', help='subreddit to scrape', type=str)
     parser.add_argument('L', help='max number submissions to scrape',
                         nargs='?', default=25, const=25, type=int)
     parser.add_argument('-v', '--video',
                         help='create video from all images in directory',
                         action='store_true')
-
     args = parser.parse_args()
 
-    # fill in own credentials!
+    # fill in own credentials
     scraper = praw.Reddit(client_id='',
                           client_secret='',
                           user_agent='',
                           username='',
                           password='')
-
+    os.chdir()
     sub = scraper.subreddit(args.subreddit)
 
     # if first time running, scrape top posts
@@ -177,4 +177,4 @@ if __name__ == '__main__':
     if args.video:
         ConvertImToVid(args.subreddit)
 
-        # ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
