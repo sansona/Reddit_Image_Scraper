@@ -11,5 +11,5 @@ Both the above components can be used as standalones for scraping images and ema
 
 To use: 
   1. Setup new user credentials on reddit & Gmail such that there are unique user info for the bot - feed into user credentials   section in subreddit_scraper.py and email_files.py respectively
-  2. Add in desired subreddits to scrape in subreddits.sh. I recommend r/wallpapers, r/astrophotography, r/earthporn, and     r/natureporn (safe for work).
+  2. Add in desired subreddits to scrape in subreddits.sh. I recommend r/wallpapers and r/astrophotography
   3. Set up cron job. I recommend scraping once a week such that the best posts bubble to the top of the subreddit when scraped - ``` 0 9 * * 0 bash 'PATH/TO/subreddit.sh' ```
